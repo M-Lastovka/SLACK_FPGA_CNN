@@ -1,0 +1,8 @@
+H2C , 0 , 450 , conv_w , 0
+H2C , 450 , 600 , fcc_w , 0
+H2C , 1050 , 10 , conv_b , 0
+H2C , 1060 , 20 , conv_n , 0
+H2C , 1080 , 210 , conv_in , 1
+C2H , 0 , 450 , conv_out , 1
+C2H , 450 , 120 , max_conv_out , 1
+C2H , 570 , 10 , fcc_out , 1

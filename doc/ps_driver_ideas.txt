@@ -1,0 +1,50 @@
+
+-Driver shall have two distinct parts - abstract and hardware part. Abstract part implements the tensor specification 
+structs, performance counter, status registers, dynamic memory allocation etc. 
+	The abstract part should be independent of the underlying interface (AXI stream, AXI lite) and the user should
+normally interact only with the abstract part. 
+	The hardware part implements the abstract commands using the underlying hardware interface (in our case AXI).
+
+The abstract part shall interface with the hardware part using only these API functions:
+
+	int   mm_write(u32 addr, u32* data, u32 len) <- memory-mapped write (write block of data of length len, starting address given by addr)
+	u32*  mm_read(u32 addr, u32 len) <- memory-mapped read (read block of data of length len, starting address given by addr)
+
+	int   stream_h2c_s(u32 dest_id, const void* data, u32 len, size_t size) <- host-to-card stream, *data points to the memory block, 
+		len is number of elements to send, size is the size of each element in bytes, blocking
+	int   stream_h2c_a(u32 dest_id, const void* data, u32 len, size_t size, int* request) <- same as stream_h2c_s but non-blocking, request is used to identify
+		a particular call for synchronization purposes
+
+	int   stream_c2h_s(u32 dest_id, const void* data, u32 len, size_t size) <- host-to-card stream, *data points to the memory block, 
+		len is number of elements to receive, size is the size of each element in bytes, blocking
+	int   stream_c2h_a(u32 dest_id, const void* data, u32 len, size_t size, int* request) <- same as stream_c2h_s but non-blocking, request is used to identify
+		a particular call for synchronization purposes
+
+	int   wait_a(int* request) <- blocks until request is finished
+
+All the underlying hardware complexity such as AXI DMA transfers, interrupts, AXI-lite transfers, timeouts and shall be hidden in these functions and not
+	expected to be touched by the user.
+        
+For the abstract part we want to have the CNN accelerator as a hierarchical struct instance, so something like this:
+
+typedef struct
+{
+	const int               cnn_vector_size;  
+	int                     cnn_accel_init;   <- the accelerator and all the supporting HW (DMA) have been initialized
+	const int               cnn_accel_id;   
+	csr_regs_t 		csr_reg; 	  <- control and status registers struct
+	per_cnt_t  		perf_cnt; 	  <- performance counters register struct
+	tens_trans_seq_t	tens_trans_seq;   <- tensor transformation sequence linked list
+} cnn_accel_t;
+
+and then we pass this instance to functions which interact with the control/data channel of the accelerator, such as reset, enable/clear/read of performance
+counters, writing of the tens. trans. specs for the given sequence, sending and receiving the data etc.
+
+ultimately, the goal is the build abstraction layers so that to deploy a DNN model user only has to do this:
+	1. call a script which takes the possibly multiple DNN descriptions in YAML or pytorch or keras or whatever, does a static check 
+		(are all the DNN features supported, matching dimension size etc.) and then modifies the C driver.
+	2. afterwards, the user loads the driver and the FPGA image
+	3. the user then calls something like cnn_accel_infer(cnn_accel_inst, cnn_model_inst, addr_input, addr_output) to execute the given model
+
+We do this, because there are many steps where the user could mess up the configuration of accelerator and this way its more user-friendly.
+Also, all the underlying functions should be still accesible by the user in case he wants to dig deeper.

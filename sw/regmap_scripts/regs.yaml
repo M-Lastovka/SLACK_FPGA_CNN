@@ -1,0 +1,711 @@
+regmap:
+-   name: CNN_ACCEL_CTRL_REG
+    description: main control register
+    address: 0
+    bitfields:
+    -   name: TENS_TRANS_SEQ_START
+        description: start signal to execute the tensor trans. sequence
+        reset: 0
+        width: 1
+        lsb: 0
+        access: wosc
+        hardware: oa
+        enums: []
+    -   name: TENS_TRANS_SEQ_LEN
+        description: number of operations in the tensor trans. sequence to be executed
+        reset: 0
+        width: 10
+        lsb: 1
+        access: rw
+        hardware: o
+        enums: []
+    -   name: SOFT_RESET
+        description: global software reset, active high
+        reset: 0
+        width: 1
+        lsb: 11
+        access: wosc
+        hardware: oa
+        enums: []
+
+-   name: CNN_ACCEL_STAT_REG
+    description: main status register
+    address: 
+    bitfields:
+    -   name: TENS_TRANS_SEQ_BUSY
+        description: active high if tensor trans. sequence is progressing
+        reset: 0
+        width: 1
+        lsb: 0
+        access: ro
+        hardware: ie
+        enums: []
+    -   name: TENS_TRANS_SEQ_CNT
+        description: index of the current trans. sequence in progress
+        reset: 0
+        width: 10
+        lsb: 1
+        access: ro
+        hardware: ie
+        enums: []
+
+-   name: CNN_ACCEL_INT_REG
+    description: main interrupt register, reserved for future use, currently only registers implemented
+    address:
+    bitfields:
+    -   name: INT_TENS_TRANS_SEQ_DONE_EN
+        description: interrupt enable - tensor transformation sequence done
+        reset: 0
+        width: 1
+        lsb: 0
+        access: rw
+        hardware: o
+        enums: []
+    -   name: INT_TENS_TRANS_SEQ_DONE_STAT
+        description: interrupt status - tensor transformation sequence done
+        reset: 0
+        width: 1
+        lsb: 1
+        access: ro
+        hardware: ie
+        enums: []
+    -   name: INT_TENS_TRANS_SEQ_DONE_CLEAR
+        description: interrupt clear - tensor transformation sequence done
+        reset: 0
+        width: 1
+        lsb: 2
+        access: wosc
+        hardware: oa
+        enums: []
+    -   name: INT_STREAM_H2C_DONE_EN
+        description: interrupt enable - tensor transformation sequence done
+        reset: 0
+        width: 1
+        lsb: 3
+        access: rw
+        hardware: o
+        enums: []
+    -   name: INT_STREAM_H2C_DONE_STAT
+        description: interrupt status - tensor transformation sequence done
+        reset: 0
+        width: 1
+        lsb: 4
+        access: ro
+        hardware: ie
+        enums: []
+    -   name: INT_STREAM_H2C_DONE_CLEAR
+        description: interrupt clear - tensor transformation sequence done
+        reset: 0
+        width: 1
+        lsb: 5
+        access: wosc
+        hardware: oa
+        enums: []
+    -   name: INT_STREAM_C2H_DONE_EN
+        description: interrupt enable - tensor transformation sequence done
+        reset: 0
+        width: 1
+        lsb: 6
+        access: rw
+        hardware: o
+        enums: []
+    -   name: INT_STREAM_C2H_DONE_STAT
+        description: interrupt status - tensor transformation sequence done
+        reset: 0
+        width: 1
+        lsb: 7
+        access: ro
+        hardware: ie
+        enums: []
+    -   name: INT_STREAM_C2H_DONE_CLEAR
+        description: interrupt clear - tensor transformation sequence done
+        reset: 0
+        width: 1
+        lsb: 8
+        access: wosc
+        hardware: oa
+        enums: []
+
+-   name: CNN_ACCEL_MMEM_OFFSET_REG
+    description: address offset for the main memory access, reserved for future use, currently only registers implemented
+    address: 
+    bitfields:
+    -   name: MMEM_BASE_ADDR
+        description: base address value
+        reset: 0
+        width: 32
+        lsb: 0
+        access: rw
+        hardware: ol
+        enums: []
+
+-   name: CNN_ACCEL_GP_RW_REG
+    description: general purpose read-write register, reserved for future use
+    address: 
+    bitfields:
+    -   name: GP_RW
+        description: general purpose register
+        reset: 0
+        width: 32
+        lsb: 0
+        access: rw
+        hardware: oi
+        enums: []
+
+###########################
+## performance counters ###
+###########################
+
+-   name: CNN_ACCEL_PERF_RUN_CTRL_REG
+    description: performance counter - total run cycles - control register
+    address: 
+    bitfields:
+    -   name: PERF_RUN_EN
+        description: perf. counter enable
+        reset: 0
+        width: 1
+        lsb: 0
+        access: rw
+        hardware: o
+    -   name: PERF_RUN_CLEAR
+        description: perf. counter clear
+        reset: 0
+        width: 1
+        lsb: 1
+        access: wosc
+        hardware: oa
+        enums: []
+
+-   name: CNN_ACCEL_PERF_RUN_LH_REG
+    description: performance counter - run cycles - lower half
+    address: 
+    bitfields:
+    -   name: PERF_RUN_LH
+        description: perf. counter value
+        reset: 0
+        width: 32
+        lsb: 0
+        access: ro
+        hardware: ie
+
+-   name: CNN_ACCEL_PERF_RUN_UH_REG
+    description: performance counter - run cycles - upper half
+    address: 
+    bitfields:
+    -   name: PERF_RUN_UH
+        description: perf. counter value
+        reset: 0
+        width: 32
+        lsb: 0
+        access: ro
+        hardware: ie
+
+-   name: CNN_ACCEL_PERF_COMP_CTRL_REG
+    description: performance counter - computation cycles - control register
+    address: 
+    bitfields:
+    -   name: PERF_COMP_EN
+        description: perf. counter enable
+        reset: 0
+        width: 1
+        lsb: 0
+        access: rw
+        hardware: o
+    -   name: PERF_COMP_CLEAR
+        description: perf. counter clear
+        reset: 0
+        width: 1
+        lsb: 1
+        access: wosc
+        hardware: oa
+        enums: []
+
+-   name: CNN_ACCEL_PERF_COMP_LH_REG
+    description: performance counter - run cycles - lower half
+    address: 
+    bitfields:
+    -   name: PERF_COMP_LH
+        description: perf. counter value
+        reset: 0
+        width: 32
+        lsb: 0
+        access: ro
+        hardware: ie
+
+-   name: CNN_ACCEL_PERF_COMP_UH_REG
+    description: performance counter - run cycles - upper half
+    address: 
+    bitfields:
+    -   name: PERF_COMP_UH
+        description: perf. counter value
+        reset: 0
+        width: 32
+        lsb: 0
+        access: ro
+        hardware: ie
+
+-   name: CNN_ACCEL_PERF_STREAM_C2H_CTRL_REG
+    description: performance counter - stream C2H cycles - control register
+    address: 
+    bitfields:
+    -   name: PERF_STREAM_EN
+        description: perf. counter enable
+        reset: 0
+        width: 1
+        lsb: 0
+        access: rw
+        hardware: o
+    -   name: PERF_STREAM_CLEAR
+        description: perf. counter clear
+        reset: 0
+        width: 1
+        lsb: 1
+        access: wosc
+        hardware: oa
+        enums: []
+-   name: CNN_ACCEL_PERF_STREAM_C2H_LH_REG
+    description: performance counter - run cycles - lower half
+    address: 
+    bitfields:
+    -   name: PERF_STREAM_LH
+        description: perf. counter value
+        reset: 0
+        width: 32
+        lsb: 0
+        access: ro
+        hardware: ie
+-   name: CNN_ACCEL_PERF_STREAM_C2H_UH_REG
+    description: performance counter - run cycles - upper half
+    address: 
+    bitfields:
+    -   name: PERF_STREAM_UH
+        description: perf. counter value
+        reset: 0
+        width: 32
+        lsb: 0
+        access: ro
+        hardware: ie
+
+-   name: CNN_ACCEL_PERF_STREAM_H2C_CTRL_REG
+    description: performance counter - stream H2C cycles - control register
+    address: 
+    bitfields:
+    -   name: PERF_STREAM_EN
+        description: perf. counter enable
+        reset: 0
+        width: 1
+        lsb: 0
+        access: rw
+        hardware: o
+    -   name: PERF_STREAM_CLEAR
+        description: perf. counter clear
+        reset: 0
+        width: 1
+        lsb: 1
+        access: wosc
+        hardware: oa
+        enums: []
+-   name: CNN_ACCEL_PERF_STREAM_H2C_LH_REG
+    description: performance counter - run cycles - lower half
+    address: 
+    bitfields:
+    -   name: PERF_STREAM_LH
+        description: perf. counter value
+        reset: 0
+        width: 32
+        lsb: 0
+        access: ro
+        hardware: ie
+-   name: CNN_ACCEL_PERF_STREAM_H2C_UH_REG
+    description: performance counter - run cycles - upper half
+    address: 
+    bitfields:
+    -   name: PERF_STREAM_UH
+        description: perf. counter value
+        reset: 0
+        width: 32
+        lsb: 0
+        access: ro
+        hardware: ie
+
+-   name: CNN_ACCEL_PERF_CACHE_STALL_CTRL_REG
+    description: performance counter - cache stall - control register, reserved for future use, currently only registers implemented
+    address: 
+    bitfields:
+    -   name: PERF_STREAM_EN
+        description: perf. counter enable
+        reset: 0
+        width: 1
+        lsb: 0
+        access: rw
+        hardware: o
+    -   name: PERF_STREAM_CLEAR
+        description: perf. counter clear
+        reset: 0
+        width: 1
+        lsb: 1
+        access: wosc
+        hardware: oa
+        enums: []
+-   name: CNN_ACCEL_PERF_CACHE_STALL_LH_REG
+    description: performance counter - run cycles - lower half, reserved for future use, currently only registers implemented
+    address: 
+    bitfields:
+    -   name: PERF_STREAM_LH
+        description: perf. counter value
+        reset: 0
+        width: 32
+        lsb: 0
+        access: ro
+        hardware: ie
+-   name: CNN_ACCEL_PERF_CACHE_STALL_UH_REG
+    description: performance counter - run cycles - upper half, reserved for future use, currently only registers implemented
+    address: 
+    bitfields:
+    -   name: PERF_STREAM_UH
+        description: perf. counter value
+        reset: 0
+        width: 32
+        lsb: 0
+        access: ro
+        hardware: ie
+
+############################
+### tensor trans. spec #####
+############################
+
+-   name: CNN_ACCEL_TENS_TRANS_CFG_REG
+    description: tensor trans. configuration
+    address: 
+    bitfields:
+    -   name: TENS_TRANS_TYPE
+        description: tensor trans. type
+        reset: 0
+        width: 4
+        lsb: 0
+        access: rw
+        hardware: o
+        enums: []
+    -   name: NLIN_F_TYPE
+        description: nonlin. function type
+        reset: 0
+        width: 4
+        lsb: 4
+        access: rw
+        hardware: o
+        enums: []
+    -   name: BATCH_NORM_EN
+        description: batch normalization enable
+        reset: 0
+        width: 1
+        lsb: 8
+        access: rw
+        hardware: o
+        enums: []
+    -   name: REPL_BIAS
+        description: replicate bias flag
+        reset: 0
+        width: 1
+        lsb: 9
+        access: rw
+        hardware: o
+        enums: []
+    -   name: BIAS_EN
+        description: bias enable
+        reset: 0
+        width: 1
+        lsb: 10
+        access: rw
+        hardware: o
+        enums: []
+
+-   name: CNN_ACCEL_TENS_TRANS_CONV_CFG_REG
+    description: convolution configuration
+    address: 
+    bitfields:
+    -   name:   CONV_STRIDE_0
+        description: convolution stride
+        reset: 0
+        width: 8
+        lsb: 0
+        access: rw
+        hardware: o
+        enums: []
+    -   name: CONV_STRIDE_1
+        description: convolution stride
+        reset: 0
+        width: 8
+        lsb: 8
+        access: rw
+        hardware: o
+        enums: []
+    -   name: CONV_PADDING_0
+        description: convolution zero padding
+        reset: 0
+        width: 8
+        lsb: 16
+        access: rw
+        hardware: o
+        enums: []
+    -   name: CONV_PADDING_1
+        description: convolution zero padding
+        reset: 0
+        width: 8
+        lsb: 24
+        access: rw
+        hardware: o
+        enums: []
+
+-   name: CNN_ACCEL_TENS_TRANS_ADDR_SRC_A_REG
+    description: tensor start address
+    address: 
+    bitfields:
+    -   name: TENS_ADDR
+        description: tensor address
+        reset: 0
+        width: 32
+        lsb: 0
+        access: rw
+        hardware: o
+        enums: []
+
+-   name: CNN_ACCEL_TENS_TRANS_ADDR_SRC_B_REG
+    description: tensor start address
+    address: 
+    bitfields:
+    -   name: TENS_ADDR
+        description: tensor address
+        reset: 0
+        width: 32
+        lsb: 0
+        access: rw
+        hardware: o
+        enums: []
+
+-   name: CNN_ACCEL_TENS_TRANS_ADDR_BATCH_NORM_REG
+    description: tensor start address
+    address: 
+    bitfields:
+    -   name: TENS_ADDR
+        description: tensor address
+        reset: 0
+        width: 32
+        lsb: 0
+        access: rw
+        hardware: o
+        enums: []
+
+-   name: CNN_ACCEL_TENS_TRANS_ADDR_BIAS_REG
+    description: tensor start address
+    address: 
+    bitfields:
+    -   name: TENS_ADDR
+        description: tensor address
+        reset: 0
+        width: 32
+        lsb: 0
+        access: rw
+        hardware: o
+        enums: []
+
+-   name: CNN_ACCEL_TENS_TRANS_ADDR_RES_REG
+    description: tensor start address
+    address: 
+    bitfields:
+    -   name: TENS_ADDR
+        description: tensor address
+        reset: 0
+        width: 32
+        lsb: 0
+        access: rw
+        hardware: o
+        enums: []
+
+-   name: CNN_ACCEL_TENS_TRANS_LIN_DIMS_SRC_A_REG
+    description: tensor trans. linear (matrix) dimensions
+    address: 
+    bitfields:
+    -   name: TENS_0_DIM
+        description: row size
+        reset: 0
+        width: 16
+        lsb: 0
+        access: rw
+        hardware: o
+        enums: []
+    -   name: TENS_1_DIM
+        description: column size
+        reset: 0
+        width: 16
+        lsb: 16
+        access: rw
+        hardware: o
+        enums: []
+
+-   name: CNN_ACCEL_TENS_TRANS_LIN_DIMS_SRC_B_REG
+    description: tensor trans. linear (matrix) dimensions
+    address: 
+    bitfields:
+    -   name: TENS_0_DIM
+        description: row size
+        reset: 0
+        width: 16
+        lsb: 0
+        access: rw
+        hardware: o
+        enums: []
+    -   name: TENS_1_DIM
+        description: column size
+        reset: 0
+        width: 16
+        lsb: 16
+        access: rw
+        hardware: o
+        enums: []
+
+-   name: CNN_ACCEL_TENS_TRANS_LIN_DIMS_RES_REG
+    description: tensor trans. linear (matrix) dimensions
+    address: 
+    bitfields:
+    -   name: TENS_0_DIM
+        description: row size
+        reset: 0
+        width: 16
+        lsb: 0
+        access: rw
+        hardware: o
+        enums: []
+    -   name: TENS_1_DIM
+        description: column size
+        reset: 0
+        width: 16
+        lsb: 16
+        access: rw
+        hardware: o
+        enums: []
+
+-   name: CNN_ACCEL_TENS_TRANS_CONV_DIMS_SRC_A_0_REG
+    description: tensor trans. convolution dimensions
+    address: 
+    bitfields:
+    -   name: TENS_0_DIM
+        description: row size
+        reset: 0
+        width: 16
+        lsb: 0
+        access: rw
+        hardware: o
+        enums: []
+    -   name: TENS_1_DIM
+        description: column size
+        reset: 0
+        width: 16
+        lsb: 16
+        access: rw
+        hardware: o
+        enums: []
+
+-   name: CNN_ACCEL_TENS_TRANS_CONV_DIMS_SRC_A_1_REG
+    description: tensor trans. convolution dimensions
+    address: 
+    bitfields:
+    -   name: TENS_2_DIM
+        description: row size
+        reset: 0
+        width: 16
+        lsb: 0
+        access: rw
+        hardware: o
+        enums: []
+    -   name: TENS_3_DIM
+        description: column size
+        reset: 0
+        width: 16
+        lsb: 16
+        access: rw
+        hardware: o
+        enums: []
+
+-   name: CNN_ACCEL_TENS_TRANS_CONV_DIMS_SRC_B_0_REG
+    description: tensor trans. convolution dimensions
+    address: 
+    bitfields:
+    -   name: TENS_0_DIM
+        description: row size
+        reset: 0
+        width: 16
+        lsb: 0
+        access: rw
+        hardware: o
+        enums: []
+    -   name: TENS_1_DIM
+        description: column size
+        reset: 0
+        width: 16
+        lsb: 16
+        access: rw
+        hardware: o
+        enums: []
+
+-   name: CNN_ACCEL_TENS_TRANS_CONV_DIMS_SRC_B_1_REG
+    description: tensor trans. convolution dimensions
+    address: 
+    bitfields:
+    -   name: TENS_2_DIM
+        description: row size
+        reset: 0
+        width: 16
+        lsb: 0
+        access: rw
+        hardware: o
+        enums: []
+    -   name: TENS_3_DIM
+        description: column size
+        reset: 0
+        width: 16
+        lsb: 16
+        access: rw
+        hardware: o
+        enums: []
+
+-   name: CNN_ACCEL_TENS_TRANS_CONV_DIMS_RES_0_REG
+    description: tensor trans. convolution dimensions
+    address: 
+    bitfields:
+    -   name: TENS_0_DIM
+        description: row size
+        reset: 0
+        width: 16
+        lsb: 0
+        access: rw
+        hardware: o
+        enums: []
+    -   name: TENS_1_DIM
+        description: column size
+        reset: 0
+        width: 16
+        lsb: 16
+        access: rw
+        hardware: o
+        enums: []
+
+-   name: CNN_ACCEL_TENS_TRANS_CONV_DIMS_RES_1_REG
+    description: tensor trans. convolution dimensions
+    address: 
+    bitfields:
+    -   name: TENS_2_DIM
+        description: row size
+        reset: 0
+        width: 16
+        lsb: 0
+        access: rw
+        hardware: o
+        enums: []
+    -   name: TENS_3_DIM
+        description: column size
+        reset: 0
+        width: 16
+        lsb: 16
+        access: rw
+        hardware: o
+        enums: []

@@ -1,0 +1,38 @@
+[globcfg]
+base_address = 0
+data_width = 32
+address_width = 32
+register_reset = sync_neg
+address_increment = 4
+address_alignment = data_width
+force_name_case = none
+regmap_path = regs.yaml
+
+;[py]
+;path = regs.py
+;generator = Python
+
+;[v_module]
+;path = regs.v
+;read_filler = 0
+;interface = axil
+;generator = Verilog
+
+;[sv_pkg]
+;path = ../../design/rtl_pckg/regmap_reg_pckg.sv
+;prefix = CSR
+;generator = SystemVerilogPackage
+
+[c_header]
+path = ../ps/driver/cnn_accel_regmap.h
+prefix = CSR
+generator = CHeader
+
+[md_doc]
+path = ../../doc/regmap_doc.md
+title = Register map
+print_images = True
+image_dir = md_img
+print_conventions = True
+generator = Markdown
+

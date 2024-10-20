@@ -1,0 +1,120 @@
+
+tens_trans_seq:
+-   name: model_load
+    description: load weights for the CIFAR10 model
+    predecessor: []
+    tens_trans:
+
+    -   tens_trans_type: TRANS_STREAM
+        res_name: conv_layer_0_weight
+        res_description: convolution kernel
+        res_dim: [3, 3, 16, 16]
+        layout: row_first
+        stream_padding: 13
+        h2c_data_source: cnn_weights.csv\conv_layer_0.weight
+        dealloc: []
+
+    -   tens_trans_type: TRANS_STREAM
+        res_name: conv_layer_0_bias
+        res_description: bias vector
+        res_dim: [16, 1]
+        layout: col_first
+        stream_padding: 0
+        h2c_data_source: cnn_weights.csv\conv_layer_0.bias
+        dealloc: []
+
+    -   tens_trans_type: TRANS_STREAM
+        res_name: batch_layer_0
+        res_description: batch layer
+        res_dim: [16, 2]
+        layout: col_first
+        stream_padding: 0
+        h2c_data_source: cnn_weights.csv\batch_layer_0
+        dealloc: []
+
+    -   tens_trans_type: TRANS_STREAM
+        res_name: lin_layer_0_weight
+        res_description: linear layer weights
+        res_dim: [16, 400]
+        layout: row_first
+        stream_padding: 0
+        h2c_data_source: cnn_weights.csv\lin_layer_0.weight
+        dealloc: []
+
+    -   tens_trans_type: TRANS_STREAM
+        res_name: lin_layer_0_bias
+        res_description: linear layer biases
+        res_dim: [16, 1]
+        layout: col_first
+        stream_padding: 0
+        h2c_data_source: cnn_weights.csv\lin_layer_0.bias
+        dealloc: []
+
+-   name: model_inference
+    description: CIFAR10 model inference
+    predecessor: [model_load]
+    tens_trans:
+
+    -   tens_trans_type: TRANS_STREAM
+        res_name: data_in
+        res_description: input tensor
+        res_dim: [32, 32, 16]
+        layout: col_first
+        stream_padding: 13
+        h2c_data_source: cnn_test_samples.csv\test_sample_0
+        dealloc: []
+
+    -   tens_trans_type: TRANS_CONV
+        nlin_f_type: NLIN_F_RELU
+        batch_norm_en: True
+        bias_en: True
+        repl_bias: True
+        src_a_name: conv_layer_0_weight
+        src_b_name: data_in
+        bias_name: conv_layer_0_bias
+        batch_name: batch_layer_0
+        stride: [2, 2]
+        padding: [1, 1]
+        res_name: conv_out
+        res_description: output conv
+        dealloc: [data_in]
+
+    -   tens_trans_type: TRANS_STREAM
+        src_name: conv_out
+        src_description: output tensor
+        stream_padding: 0
+        dealloc: []
+
+    -   tens_trans_type: TRANS_MAXPOOL
+        src_name: conv_out
+        kern_size: [3, 3]
+        stride: [3, 3]
+        padding: [0, 0]
+        res_name: max_conv_out
+        res_description: output conv, maxpooled
+        dealloc: [conv_out]
+
+    -   tens_trans_type: TRANS_STREAM
+        src_name: max_conv_out
+        src_description: output tensor, maxpooled
+        stream_padding: 0
+        dealloc: []
+
+    -   tens_trans_type: TRANS_LIN
+        nlin_f_type: NLIN_F_IDENTITY
+        batch_norm_en: False
+        bias_en: True
+        repl_bias: True
+        src_a_name: lin_layer_0_weight
+        src_b_name: max_conv_out
+        bias_name: lin_layer_0_bias
+        batch_name: 
+        res_name: fcc_out
+        res_description: output fcc
+        dealloc: [max_conv_out]
+        
+    -   tens_trans_type: TRANS_STREAM
+        src_name: fcc_out
+        src_description: output matrix
+        stream_padding: 6
+        dealloc: [fcc_out]

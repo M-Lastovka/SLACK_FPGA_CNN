@@ -1,0 +1,111 @@
+
+tens_trans_seq:
+-   name: conv_model_load
+    description: load weights for the conv layer
+    predecessor: []
+    tens_trans:
+
+    -   tens_trans_type: TRANS_STREAM
+        res_name: conv_w
+        res_description: convolution kernel
+        res_dim: [3, 3, 5, 5]
+        layout: row_first
+        res_stream_padding: 0
+        h2c_data_source: rand_gauss
+        dealloc: []
+
+    -   tens_trans_type: TRANS_STREAM
+        res_name: fcc_w
+        res_description: linear layer weights
+        res_dim: [5, 60]
+        layout: row_first
+        res_stream_padding: 0
+        h2c_data_source: rand_gauss
+        dealloc: []
+
+    -   tens_trans_type: TRANS_STREAM
+        res_name: conv_b
+        res_description: bias vector
+        res_dim: [5, 1]
+        layout: col_first
+        res_stream_padding: 0
+        h2c_data_source: rand_gauss
+        dealloc: []
+
+    -   tens_trans_type: TRANS_STREAM
+        res_name: conv_n
+        res_description: batch norm params
+        res_dim: [5, 2]
+        layout: col_first
+        res_stream_padding: 0
+        h2c_data_source: rand_gauss
+        dealloc: []
+
+-   name: conv_model
+    description: conv layer
+    predecessor: [conv_model_load]
+    tens_trans:
+
+    -   tens_trans_type: TRANS_STREAM
+        res_name: conv_in
+        res_description: input tensor
+        res_dim: [7, 5, 5]
+        layout: col_first
+        res_stream_padding: 2
+        h2c_data_source: rand_gauss
+        dealloc: []
+
+    -   tens_trans_type: TRANS_CONV
+        nlin_f_type: NLIN_F_TANH
+        batch_norm_en: True
+        bias_en: True
+        repl_bias: True
+        src_a_name: conv_w
+        src_b_name: conv_in
+        bias_name: conv_b
+        batch_name: conv_n
+        stride: [2, 1]
+        padding: [2, 3]
+        res_name: conv_out
+        res_description: output conv
+        dealloc: [conv_in]
+
+    -   tens_trans_type: TRANS_STREAM
+        src_name: conv_out
+        src_description: output tensor
+        src_stream_padding: 0
+        dealloc: []
+
+    -   tens_trans_type: TRANS_MAXPOOL
+        src_name: conv_out
+        kern_size: [3, 2]
+        stride: [2, 3]
+        padding: [1, 2]
+        res_name: max_conv_out
+        res_description: output conv, maxpooled
+        dealloc: [conv_out]
+
+    -   tens_trans_type: TRANS_STREAM
+        src_name: max_conv_out
+        src_description: output tensor, maxpooled
+        src_stream_padding: 0
+        dealloc: []
+
+    -   tens_trans_type: TRANS_LIN
+        nlin_f_type: NLIN_F_TANH
+        batch_norm_en: False
+        bias_en: False
+        repl_bias: False
+        src_a_name: fcc_w
+        src_b_name: max_conv_out
+        bias_name: 
+        batch_name: 
+        res_name: fcc_out
+        res_description: output fcc
+        dealloc: [max_conv_out]
+        
+    -   tens_trans_type: TRANS_STREAM
+        src_name: fcc_out
+        src_description: output matrix
+        src_stream_padding: 3
+        dealloc: [fcc_out]

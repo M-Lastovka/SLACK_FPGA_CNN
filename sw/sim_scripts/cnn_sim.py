@@ -364,110 +364,133 @@ def mem_lin_alloc(tens_trans_seq_lst): #pass through the sequence and allocate m
     
     print("Done with allocating memory for the tensors\n")
 
-def gen_mm_trans(tens_trans_seq_lst, sim_mm_file_path):
+def gen_mm_trans(tens_trans_seq_lst, sim_mm_file_path, driver_mm_config_file_path):
 
     print("Generating memory-mapped transactions\n")
     
-    with open(os.path.join(os.getcwd(), sim_mm_file_path), 'wb') as file:
+    with open(os.path.join(os.getcwd(), sim_mm_file_path), 'wb') as file_bin:
+        with open(os.path.join(os.getcwd(), driver_mm_config_file_path), 'w') as file_driver:
+            #setup regmap
+            regmap = cnn_r.RegMap(cnn_r.interface(2**cnn_p.C_REGMAP_ADDR_WDT, file_bin, file_driver)) 
+            #initialize regs
+            ctrl_reg                            = cnn_r._RegCnn_accel_ctrl_reg(regmap)
+            stat_reg                            = cnn_r._RegCnn_accel_stat_reg(regmap)
+            int_reg                             = cnn_r._RegCnn_accel_int_reg(regmap)
+            mmem_offset_reg                     = cnn_r._RegCnn_accel_mmem_offset_reg(regmap)
+            gp_rw_reg                           = cnn_r._RegCnn_accel_gp_rw_reg(regmap)
+            perf_run_ctrl_reg                   = cnn_r._RegCnn_accel_perf_run_ctrl_reg(regmap)
+            perf_run_lh_reg                     = cnn_r._RegCnn_accel_perf_run_lh_reg(regmap)
+            perf_run_uh_reg                     = cnn_r._RegCnn_accel_perf_run_uh_reg(regmap)
+            perf_comp_ctrl_reg                  = cnn_r._RegCnn_accel_perf_comp_ctrl_reg(regmap)
+            perf_comp_lh_reg                    = cnn_r._RegCnn_accel_perf_comp_lh_reg(regmap)
+            perf_comp_uh_reg                    = cnn_r._RegCnn_accel_perf_comp_uh_reg(regmap)
+            perf_stream_c2h_ctrl_reg            = cnn_r._RegCnn_accel_perf_stream_c2h_ctrl_reg(regmap)
+            perf_stream_c2h_lh_reg              = cnn_r._RegCnn_accel_perf_stream_c2h_lh_reg(regmap)
+            perf_stream_c2h_uh_reg              = cnn_r._RegCnn_accel_perf_stream_c2h_uh_reg(regmap)
+            perf_stream_h2c_ctrl_reg            = cnn_r._RegCnn_accel_perf_stream_h2c_ctrl_reg(regmap)
+            perf_stream_h2c_lh_reg              = cnn_r._RegCnn_accel_perf_stream_h2c_lh_reg(regmap)
+            perf_stream_h2c_uh_reg              = cnn_r._RegCnn_accel_perf_stream_h2c_uh_reg(regmap)
+            perf_cache_stall_ctrl_reg           = cnn_r._RegCnn_accel_perf_cache_stall_ctrl_reg(regmap)
+            perf_cache_stall_lh_reg             = cnn_r._RegCnn_accel_perf_cache_stall_lh_reg(regmap)
+            perf_cache_stall_uh_reg             = cnn_r._RegCnn_accel_perf_cache_stall_uh_reg(regmap)       
+            tens_trans_cfg_reg                  = cnn_r._RegCnn_accel_tens_trans_cfg_reg(regmap)
+            tens_trans_conv_cfg_reg             = cnn_r._RegCnn_accel_tens_trans_conv_cfg_reg(regmap)
+            tens_trans_addr_src_a_reg           = cnn_r._RegCnn_accel_tens_trans_addr_src_a_reg(regmap)
+            tens_trans_addr_src_b_reg           = cnn_r._RegCnn_accel_tens_trans_addr_src_b_reg(regmap)
+            tens_trans_addr_batch_norm_reg      = cnn_r._RegCnn_accel_tens_trans_addr_batch_norm_reg(regmap)
+            tens_trans_addr_bias_reg            = cnn_r._RegCnn_accel_tens_trans_addr_bias_reg(regmap)
+            tens_trans_addr_res_reg             = cnn_r._RegCnn_accel_tens_trans_addr_res_reg(regmap)
+            tens_trans_lin_dims_src_a_reg       = cnn_r._RegCnn_accel_tens_trans_lin_dims_src_a_reg(regmap)
+            tens_trans_lin_dims_src_b_reg       = cnn_r._RegCnn_accel_tens_trans_lin_dims_src_b_reg(regmap)
+            tens_trans_lin_dims_res_reg         = cnn_r._RegCnn_accel_tens_trans_lin_dims_res_reg(regmap)
+            tens_trans_conv_dims_src_a_0_reg    = cnn_r._RegCnn_accel_tens_trans_conv_dims_src_a_0_reg(regmap)
+            tens_trans_conv_dims_src_a_1_reg    = cnn_r._RegCnn_accel_tens_trans_conv_dims_src_a_1_reg(regmap)
+            tens_trans_conv_dims_src_b_0_reg    = cnn_r._RegCnn_accel_tens_trans_conv_dims_src_b_0_reg(regmap)
+            tens_trans_conv_dims_src_b_1_reg    = cnn_r._RegCnn_accel_tens_trans_conv_dims_src_b_1_reg(regmap)
+            tens_trans_conv_dims_res_0_reg      = cnn_r._RegCnn_accel_tens_trans_conv_dims_res_0_reg(regmap)
+            tens_trans_conv_dims_res_1_reg      = cnn_r._RegCnn_accel_tens_trans_conv_dims_res_1_reg(regmap)
 
-        #setup regmap
-        regmap = cnn_r.RegMap(cnn_r.interface(2**cnn_p.C_REGMAP_ADDR_WDT, file)) 
-        #initialize regs
-        ctrl_reg                            = cnn_r._RegCnn_accel_ctrl_reg(regmap)
-        stat_reg                            = cnn_r._RegCnn_accel_stat_reg(regmap)
-        int_reg                             = cnn_r._RegCnn_accel_int_reg(regmap)
-        mmem_offset_reg                     = cnn_r._RegCnn_accel_mmem_offset_reg(regmap)
-        gp_rw_reg                           = cnn_r._RegCnn_accel_gp_rw_reg(regmap)
-        perf_run_ctrl_reg                   = cnn_r._RegCnn_accel_perf_run_ctrl_reg(regmap)
-        perf_run_lh_reg                     = cnn_r._RegCnn_accel_perf_run_lh_reg(regmap)
-        perf_run_uh_reg                     = cnn_r._RegCnn_accel_perf_run_uh_reg(regmap)
-        perf_comp_ctrl_reg                  = cnn_r._RegCnn_accel_perf_comp_ctrl_reg(regmap)
-        perf_comp_lh_reg                    = cnn_r._RegCnn_accel_perf_comp_lh_reg(regmap)
-        perf_comp_uh_reg                    = cnn_r._RegCnn_accel_perf_comp_uh_reg(regmap)
-        perf_stream_c2h_ctrl_reg            = cnn_r._RegCnn_accel_perf_stream_c2h_ctrl_reg(regmap)
-        perf_stream_c2h_lh_reg              = cnn_r._RegCnn_accel_perf_stream_c2h_lh_reg(regmap)
-        perf_stream_c2h_uh_reg              = cnn_r._RegCnn_accel_perf_stream_c2h_uh_reg(regmap)
-        perf_stream_h2c_ctrl_reg            = cnn_r._RegCnn_accel_perf_stream_h2c_ctrl_reg(regmap)
-        perf_stream_h2c_lh_reg              = cnn_r._RegCnn_accel_perf_stream_h2c_lh_reg(regmap)
-        perf_stream_h2c_uh_reg              = cnn_r._RegCnn_accel_perf_stream_h2c_uh_reg(regmap)
-        perf_cache_stall_ctrl_reg           = cnn_r._RegCnn_accel_perf_cache_stall_ctrl_reg(regmap)
-        perf_cache_stall_lh_reg             = cnn_r._RegCnn_accel_perf_cache_stall_lh_reg(regmap)
-        perf_cache_stall_uh_reg             = cnn_r._RegCnn_accel_perf_cache_stall_uh_reg(regmap)       
-        tens_trans_cfg_reg                  = cnn_r._RegCnn_accel_tens_trans_cfg_reg(regmap)
-        tens_trans_conv_cfg_reg             = cnn_r._RegCnn_accel_tens_trans_conv_cfg_reg(regmap)
-        tens_trans_addr_src_a_reg           = cnn_r._RegCnn_accel_tens_trans_addr_src_a_reg(regmap)
-        tens_trans_addr_src_b_reg           = cnn_r._RegCnn_accel_tens_trans_addr_src_b_reg(regmap)
-        tens_trans_addr_batch_norm_reg      = cnn_r._RegCnn_accel_tens_trans_addr_batch_norm_reg(regmap)
-        tens_trans_addr_bias_reg            = cnn_r._RegCnn_accel_tens_trans_addr_bias_reg(regmap)
-        tens_trans_addr_res_reg             = cnn_r._RegCnn_accel_tens_trans_addr_res_reg(regmap)
-        tens_trans_lin_dims_src_a_reg       = cnn_r._RegCnn_accel_tens_trans_lin_dims_src_a_reg(regmap)
-        tens_trans_lin_dims_src_b_reg       = cnn_r._RegCnn_accel_tens_trans_lin_dims_src_b_reg(regmap)
-        tens_trans_lin_dims_res_reg         = cnn_r._RegCnn_accel_tens_trans_lin_dims_res_reg(regmap)
-        tens_trans_conv_dims_src_a_0_reg    = cnn_r._RegCnn_accel_tens_trans_conv_dims_src_a_0_reg(regmap)
-        tens_trans_conv_dims_src_a_1_reg    = cnn_r._RegCnn_accel_tens_trans_conv_dims_src_a_1_reg(regmap)
-        tens_trans_conv_dims_src_b_0_reg    = cnn_r._RegCnn_accel_tens_trans_conv_dims_src_b_0_reg(regmap)
-        tens_trans_conv_dims_src_b_1_reg    = cnn_r._RegCnn_accel_tens_trans_conv_dims_src_b_1_reg(regmap)
-        tens_trans_conv_dims_res_0_reg      = cnn_r._RegCnn_accel_tens_trans_conv_dims_res_0_reg(regmap)
-        tens_trans_conv_dims_res_1_reg      = cnn_r._RegCnn_accel_tens_trans_conv_dims_res_1_reg(regmap)
+            #set global variables performance counters, mem offset, etc.
+            perf_run_ctrl_reg.perf_run_en           = 1
+            perf_comp_ctrl_reg.perf_comp_en         = 1
+            perf_stream_c2h_ctrl_reg.perf_stream_en = 1
+            perf_stream_h2c_ctrl_reg.perf_stream_en = 1
+            mmem_offset_reg.mmem_offset             = 64
+            int_reg.int_stream_c2h_done_en          = 1
+            int_reg.int_stream_h2c_done_en          = 1
+            int_reg.int_tens_trans_seq_done_en      = 1
+            gp_rw_reg.gp_rw = 0xDEADBEEF
+            regmap._if.dump_state(regmap.CNN_ACCEL_MMEM_OFFSET_REG_ADDR, regmap.CNN_ACCEL_PERF_CACHE_STALL_UH_REG_ADDR)
 
-        #set global variables performance counters, mem offset, etc.
-        perf_run_ctrl_reg.perf_run_en           = 1
-        perf_comp_ctrl_reg.perf_comp_en         = 1
-        perf_stream_c2h_ctrl_reg.perf_stream_en = 1
-        perf_stream_h2c_ctrl_reg.perf_stream_en = 1
-        mmem_offset_reg.mmem_offset             = 64
-        int_reg.int_stream_c2h_done_en          = 1
-        int_reg.int_stream_h2c_done_en          = 1
-        int_reg.int_tens_trans_seq_done_en      = 1
-        gp_rw_reg.gp_rw = 0xDEADBEEF
-        regmap._if.dump_state(regmap.CNN_ACCEL_MMEM_OFFSET_REG_ADDR, regmap.CNN_ACCEL_PERF_CACHE_STALL_UH_REG_ADDR)
+            #print driver header
+            file_driver.write(f"""\
+/**
+* @brief Memory-mapped writes to the accelerators regmap to configure it
+*        for tensor transformation sequences 
+*
+* Auto-generated C driver header. Do not modify manually.
+*
+**/
 
-        #pass through all sequences, through all transformations and generate the needed MM trans
-        for seq in tens_trans_seq_lst:
-            tens_spec_offset = 0
-            for tens_trans in seq.tens_trans_set:
-                tens_trans_cfg_reg.tens_trans_type          = tens_trans.tens_trans_spec.tens_trans_type
-                tens_trans_cfg_reg.nlin_f_type              = tens_trans.tens_trans_spec.nlin_f_type
-                tens_trans_cfg_reg.batch_norm_en            = tens_trans.tens_trans_spec.batch_norm_en
-                tens_trans_cfg_reg.bias_en                  = tens_trans.tens_trans_spec.bias_en
-                tens_trans_cfg_reg.repl_bias                = tens_trans.tens_trans_spec.repl_bias
-                tens_trans_conv_cfg_reg.conv_stride_0       = tens_trans.tens_trans_spec.conv_cfg.conv_stride_0     
-                tens_trans_conv_cfg_reg.conv_stride_1       = tens_trans.tens_trans_spec.conv_cfg.conv_stride_1
-                tens_trans_conv_cfg_reg.conv_padding_0      = tens_trans.tens_trans_spec.conv_cfg.conv_padding_0      
-                tens_trans_conv_cfg_reg.conv_padding_1      = tens_trans.tens_trans_spec.conv_cfg.conv_padding_1
-                tens_trans_addr_src_a_reg.tens_addr         = tens_trans.tens_trans_spec.tens_trans_addrs.tens_src_a_addr
-                tens_trans_addr_src_b_reg.tens_addr         = tens_trans.tens_trans_spec.tens_trans_addrs.tens_src_b_addr
-                tens_trans_addr_batch_norm_reg.tens_addr    = tens_trans.tens_trans_spec.tens_trans_addrs.tens_batch_norm_addr
-                tens_trans_addr_bias_reg.tens_addr          = tens_trans.tens_trans_spec.tens_trans_addrs.tens_bias_addr
-                tens_trans_addr_res_reg.tens_addr           = tens_trans.tens_trans_spec.tens_trans_addrs.tens_res_addr
-                tens_trans_lin_dims_src_a_reg.tens_0_dim    = tens_trans.tens_trans_spec.mtx_trans_dims.tens_src_a_dims.tens_0_dim
-                tens_trans_lin_dims_src_a_reg.tens_1_dim    = tens_trans.tens_trans_spec.mtx_trans_dims.tens_src_a_dims.tens_1_dim
-                tens_trans_lin_dims_src_b_reg.tens_0_dim    = tens_trans.tens_trans_spec.mtx_trans_dims.tens_src_b_dims.tens_0_dim
-                tens_trans_lin_dims_src_b_reg.tens_1_dim    = tens_trans.tens_trans_spec.mtx_trans_dims.tens_src_b_dims.tens_1_dim
-                tens_trans_lin_dims_res_reg.tens_0_dim      = tens_trans.tens_trans_spec.mtx_trans_dims.tens_res_dims.tens_0_dim
-                tens_trans_lin_dims_res_reg.tens_1_dim      = tens_trans.tens_trans_spec.mtx_trans_dims.tens_res_dims.tens_1_dim
-                tens_trans_conv_dims_src_a_0_reg.tens_0_dim = tens_trans.tens_trans_spec.tens_trans_dims.tens_src_a_dims.tens_0_dim
-                tens_trans_conv_dims_src_a_0_reg.tens_1_dim = tens_trans.tens_trans_spec.tens_trans_dims.tens_src_a_dims.tens_1_dim
-                tens_trans_conv_dims_src_a_1_reg.tens_2_dim = tens_trans.tens_trans_spec.tens_trans_dims.tens_src_a_dims.tens_2_dim
-                tens_trans_conv_dims_src_a_1_reg.tens_3_dim = tens_trans.tens_trans_spec.tens_trans_dims.tens_src_a_dims.tens_3_dim
-                tens_trans_conv_dims_src_b_0_reg.tens_0_dim = tens_trans.tens_trans_spec.tens_trans_dims.tens_src_b_dims.tens_0_dim
-                tens_trans_conv_dims_src_b_0_reg.tens_1_dim = tens_trans.tens_trans_spec.tens_trans_dims.tens_src_b_dims.tens_1_dim
-                tens_trans_conv_dims_src_b_1_reg.tens_2_dim = tens_trans.tens_trans_spec.tens_trans_dims.tens_src_b_dims.tens_2_dim
-                tens_trans_conv_dims_src_b_1_reg.tens_3_dim = tens_trans.tens_trans_spec.tens_trans_dims.tens_src_b_dims.tens_3_dim
-                tens_trans_conv_dims_res_0_reg.tens_0_dim   = tens_trans.tens_trans_spec.tens_trans_dims.tens_res_dims.tens_0_dim
-                tens_trans_conv_dims_res_0_reg.tens_1_dim   = tens_trans.tens_trans_spec.tens_trans_dims.tens_res_dims.tens_1_dim
-                tens_trans_conv_dims_res_1_reg.tens_2_dim   = tens_trans.tens_trans_spec.tens_trans_dims.tens_res_dims.tens_2_dim
-                tens_trans_conv_dims_res_1_reg.tens_3_dim   = tens_trans.tens_trans_spec.tens_trans_dims.tens_res_dims.tens_3_dim
-                if(not (tens_trans.tens_trans_spec.tens_trans_type == cnn_p.tens_trans_type_t.TRANS_CONV or tens_trans.tens_trans_spec.tens_trans_type == cnn_p.tens_trans_type_t.TRANS_MAXPOOL)):
-                    regmap._if.dump_state(regmap.CNN_ACCEL_TENS_TRANS_CFG_REG_ADDR, regmap.CNN_ACCEL_TENS_TRANS_LIN_DIMS_RES_REG_ADDR, False, tens_spec_offset)
-                    tens_spec_offset = tens_spec_offset + (regmap.CNN_ACCEL_TENS_TRANS_LIN_DIMS_RES_REG_ADDR - regmap.CNN_ACCEL_TENS_TRANS_CFG_REG_ADDR + 4)
-                else:
-                    regmap._if.dump_state(regmap.CNN_ACCEL_TENS_TRANS_CFG_REG_ADDR, regmap.CNN_ACCEL_TENS_TRANS_CONV_DIMS_RES_1_REG_ADDR, False, tens_spec_offset)
-                    tens_spec_offset = tens_spec_offset + (regmap.CNN_ACCEL_TENS_TRANS_CONV_DIMS_RES_1_REG_ADDR - regmap.CNN_ACCEL_TENS_TRANS_CFG_REG_ADDR + 4)
-            ctrl_reg.tens_trans_seq_len = len(seq.tens_trans_set)
-            ctrl_reg.tens_trans_seq_start = 1
-            regmap._if.dump_state(regmap.CNN_ACCEL_CTRL_REG_ADDR, regmap.CNN_ACCEL_CTRL_REG_ADDR, True)
+#ifndef DRIVER_MM_CONFIG
+#define DRIVER_MM_CONFIG
 
+#include <stdint.h>
+                  
+""")
+
+            #pass through all sequences, through all transformations and generate the needed MM trans
+            for seq in tens_trans_seq_lst:
+                tens_spec_offset = 0
+                #print function definition
+                file_driver.write(f"int {seq.name}_seq_mm_config() {{\n")
+                for tens_trans in seq.tens_trans_set:
+                    tens_trans_cfg_reg.tens_trans_type          = tens_trans.tens_trans_spec.tens_trans_type
+                    tens_trans_cfg_reg.nlin_f_type              = tens_trans.tens_trans_spec.nlin_f_type
+                    tens_trans_cfg_reg.batch_norm_en            = tens_trans.tens_trans_spec.batch_norm_en
+                    tens_trans_cfg_reg.bias_en                  = tens_trans.tens_trans_spec.bias_en
+                    tens_trans_cfg_reg.repl_bias                = tens_trans.tens_trans_spec.repl_bias
+                    tens_trans_conv_cfg_reg.conv_stride_0       = tens_trans.tens_trans_spec.conv_cfg.conv_stride_0     
+                    tens_trans_conv_cfg_reg.conv_stride_1       = tens_trans.tens_trans_spec.conv_cfg.conv_stride_1
+                    tens_trans_conv_cfg_reg.conv_padding_0      = tens_trans.tens_trans_spec.conv_cfg.conv_padding_0      
+                    tens_trans_conv_cfg_reg.conv_padding_1      = tens_trans.tens_trans_spec.conv_cfg.conv_padding_1
+                    tens_trans_addr_src_a_reg.tens_addr         = tens_trans.tens_trans_spec.tens_trans_addrs.tens_src_a_addr
+                    tens_trans_addr_src_b_reg.tens_addr         = tens_trans.tens_trans_spec.tens_trans_addrs.tens_src_b_addr
+                    tens_trans_addr_batch_norm_reg.tens_addr    = tens_trans.tens_trans_spec.tens_trans_addrs.tens_batch_norm_addr
+                    tens_trans_addr_bias_reg.tens_addr          = tens_trans.tens_trans_spec.tens_trans_addrs.tens_bias_addr
+                    tens_trans_addr_res_reg.tens_addr           = tens_trans.tens_trans_spec.tens_trans_addrs.tens_res_addr
+                    tens_trans_lin_dims_src_a_reg.tens_0_dim    = tens_trans.tens_trans_spec.mtx_trans_dims.tens_src_a_dims.tens_0_dim
+                    tens_trans_lin_dims_src_a_reg.tens_1_dim    = tens_trans.tens_trans_spec.mtx_trans_dims.tens_src_a_dims.tens_1_dim
+                    tens_trans_lin_dims_src_b_reg.tens_0_dim    = tens_trans.tens_trans_spec.mtx_trans_dims.tens_src_b_dims.tens_0_dim
+                    tens_trans_lin_dims_src_b_reg.tens_1_dim    = tens_trans.tens_trans_spec.mtx_trans_dims.tens_src_b_dims.tens_1_dim
+                    tens_trans_lin_dims_res_reg.tens_0_dim      = tens_trans.tens_trans_spec.mtx_trans_dims.tens_res_dims.tens_0_dim
+                    tens_trans_lin_dims_res_reg.tens_1_dim      = tens_trans.tens_trans_spec.mtx_trans_dims.tens_res_dims.tens_1_dim
+                    tens_trans_conv_dims_src_a_0_reg.tens_0_dim = tens_trans.tens_trans_spec.tens_trans_dims.tens_src_a_dims.tens_0_dim
+                    tens_trans_conv_dims_src_a_0_reg.tens_1_dim = tens_trans.tens_trans_spec.tens_trans_dims.tens_src_a_dims.tens_1_dim
+                    tens_trans_conv_dims_src_a_1_reg.tens_2_dim = tens_trans.tens_trans_spec.tens_trans_dims.tens_src_a_dims.tens_2_dim
+                    tens_trans_conv_dims_src_a_1_reg.tens_3_dim = tens_trans.tens_trans_spec.tens_trans_dims.tens_src_a_dims.tens_3_dim
+                    tens_trans_conv_dims_src_b_0_reg.tens_0_dim = tens_trans.tens_trans_spec.tens_trans_dims.tens_src_b_dims.tens_0_dim
+                    tens_trans_conv_dims_src_b_0_reg.tens_1_dim = tens_trans.tens_trans_spec.tens_trans_dims.tens_src_b_dims.tens_1_dim
+                    tens_trans_conv_dims_src_b_1_reg.tens_2_dim = tens_trans.tens_trans_spec.tens_trans_dims.tens_src_b_dims.tens_2_dim
+                    tens_trans_conv_dims_src_b_1_reg.tens_3_dim = tens_trans.tens_trans_spec.tens_trans_dims.tens_src_b_dims.tens_3_dim
+                    tens_trans_conv_dims_res_0_reg.tens_0_dim   = tens_trans.tens_trans_spec.tens_trans_dims.tens_res_dims.tens_0_dim
+                    tens_trans_conv_dims_res_0_reg.tens_1_dim   = tens_trans.tens_trans_spec.tens_trans_dims.tens_res_dims.tens_1_dim
+                    tens_trans_conv_dims_res_1_reg.tens_2_dim   = tens_trans.tens_trans_spec.tens_trans_dims.tens_res_dims.tens_2_dim
+                    tens_trans_conv_dims_res_1_reg.tens_3_dim   = tens_trans.tens_trans_spec.tens_trans_dims.tens_res_dims.tens_3_dim
+                    if(not (tens_trans.tens_trans_spec.tens_trans_type == cnn_p.tens_trans_type_t.TRANS_CONV or tens_trans.tens_trans_spec.tens_trans_type == cnn_p.tens_trans_type_t.TRANS_MAXPOOL)):
+                        regmap._if.dump_state(regmap.CNN_ACCEL_TENS_TRANS_CFG_REG_ADDR, regmap.CNN_ACCEL_TENS_TRANS_LIN_DIMS_RES_REG_ADDR, False, tens_spec_offset, True)
+                        tens_spec_offset = tens_spec_offset + (regmap.CNN_ACCEL_TENS_TRANS_LIN_DIMS_RES_REG_ADDR - regmap.CNN_ACCEL_TENS_TRANS_CFG_REG_ADDR + 4)
+                    else:
+                        regmap._if.dump_state(regmap.CNN_ACCEL_TENS_TRANS_CFG_REG_ADDR, regmap.CNN_ACCEL_TENS_TRANS_CONV_DIMS_RES_1_REG_ADDR, False, tens_spec_offset, True)
+                        tens_spec_offset = tens_spec_offset + (regmap.CNN_ACCEL_TENS_TRANS_CONV_DIMS_RES_1_REG_ADDR - regmap.CNN_ACCEL_TENS_TRANS_CFG_REG_ADDR + 4)
+                file_driver.write("return 1;\n}\n\n")
+                ctrl_reg.tens_trans_seq_len = len(seq.tens_trans_set)
+                ctrl_reg.tens_trans_seq_start = 1
+                regmap._if.dump_state(regmap.CNN_ACCEL_CTRL_REG_ADDR, regmap.CNN_ACCEL_CTRL_REG_ADDR, True)
+
+            file_driver.write("\n#endif DRIVER_MM_CONFIG\n")
+
+    print("Done generating driver memory-mapped configuration, dumping output in: " + os.path.join(os.getcwd(), driver_mm_config_file_path) + "\n")
     print("Done generating memory-mapped transactions, dumping output in: " + os.path.join(os.getcwd(), sim_mm_file_path) + "\n")
 
 def write_fxp_entry(file, fxp_entry):
@@ -731,12 +754,12 @@ def model_comp(tens_trans_seq_lst, h2c_trans_lst): #computes the reduced-precisi
                 else:
                     assert False, "Error, not yet implemented"
                                 
-def gen_sim_in(model_descr_file_path, sim_mm_file_path, sim_in_stream_file_path, sim_ctrl_path):
+def gen_sim_in(model_descr_file_path, sim_mm_file_path, sim_in_stream_file_path, sim_ctrl_path, driver_mm_config_file_path):
     build()
     print("Generating simulation inputs\n")
     tens_trans_seq_lst = gen_inter_repr(model_descr_file_path) #generate internal representation
     mem_lin_alloc(tens_trans_seq_lst) #allocate addresses
-    gen_mm_trans(tens_trans_seq_lst, sim_mm_file_path) #generate memory-mapped transactions
+    gen_mm_trans(tens_trans_seq_lst, sim_mm_file_path, driver_mm_config_file_path) #generate memory-mapped transactions
     h2c_trans_lst, c2h_trans_lst = gen_stream_trans(tens_trans_seq_lst, sim_in_stream_file_path) #generate H2C stream data
     gen_ctrl(tens_trans_seq_lst, h2c_trans_lst, c2h_trans_lst, sim_ctrl_path) #generate simulation control data
 
@@ -763,18 +786,18 @@ if __name__ == "__main__":
 
     #TODO autogenerate the default file paths
     #add the command line arguments
-    parser.add_argument("mode",                     nargs='?',  type=str, default="s_in",                   help="if 's_in' then we generate simulation inputs, if 's_out' we process simulation outputs")
-    parser.add_argument("model_descr_file_path",    nargs='?',  type=str, default="test_model_spec.yaml",   help="Relative path to file which describes the models (tensor transformation sequences) to be simulated")
-    parser.add_argument("sim_mm_file_path",         nargs='?',  type=str, default="test_mm.bin",            help="Relative path to the file describing memory-mapped transactions")
-    parser.add_argument("sim_in_stream_file_path",  nargs='?',  type=str, default="test_h2c_stream.bin",    help="Relative path to the file describing the stream inputs")
-    parser.add_argument("sim_out_stream_file_path", nargs='?',  type=str, default="test_c2h_stream.bin",    help="Relative path to the file describing the stream outputs")
-    parser.add_argument("sim_ctrl_path",            nargs='?',  type=str, default="test_ctrl.txt",          help="Relative path to the file with simulation flow metadata")
-    parser.add_argument("driver_file_path",         nargs='?',  type=str, default="test_driver.c",          help="Relative path the generated C driver")
+    parser.add_argument("mode",                                 nargs='?',  type=str, default="s_in",                   help="if 's_in' then we generate simulation inputs, if 's_out' we process simulation outputs")
+    parser.add_argument("model_descr_file_path",                nargs='?',  type=str, default="test_model_spec.yaml",   help="Relative path to file which describes the models (tensor transformation sequences) to be simulated")
+    parser.add_argument("sim_mm_file_path",                     nargs='?',  type=str, default="test_mm.bin",            help="Relative path to the file describing memory-mapped transactions")
+    parser.add_argument("sim_in_stream_file_path",              nargs='?',  type=str, default="test_h2c_stream.bin",    help="Relative path to the file describing the stream inputs")
+    parser.add_argument("sim_out_stream_file_path",             nargs='?',  type=str, default="test_c2h_stream.bin",    help="Relative path to the file describing the stream outputs")
+    parser.add_argument("sim_ctrl_path",                        nargs='?',  type=str, default="test_ctrl.txt",          help="Relative path to the file with simulation flow metadata")
+    parser.add_argument("driver_mm_config_file_path",           nargs='?',  type=str, default="test_driver.c",          help="Relative path the generated C driver for MM config")
 
     #parse the command line arguments
     args = parser.parse_args()
     if(args.mode == "s_in"):
-        gen_sim_in(args.model_descr_file_path, args.sim_mm_file_path, args.sim_in_stream_file_path, args.sim_ctrl_path)
+        gen_sim_in(args.model_descr_file_path, args.sim_mm_file_path, args.sim_in_stream_file_path, args.sim_ctrl_path, args.driver_mm_config_file_path)
     elif(args.mode == "s_out"):
         proc_sim_out(args.model_descr_file_path, args.sim_in_stream_file_path, args.sim_out_stream_file_path)
     elif(args.mode == "m"):

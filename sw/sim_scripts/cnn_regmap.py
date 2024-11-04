@@ -9,10 +9,11 @@ Control/status register map.
 import struct
 
 class interface:
-    def __init__(self, regmap_size, fd):
+    def __init__(self, regmap_size, fd_mm_bin, fd_driver):
         # Initialize reg_map_mem with a static size of 32 and 32-bit integers (using a list)
         self.reg_map_mem = [0] * regmap_size
-        self.fd = fd
+        self.fd_mm_bin = fd_mm_bin
+        self.fd_driver = fd_driver
 
     def write(self, address, value):
         """Writes a value to the reg_map_mem at the specified address."""
@@ -32,29 +33,36 @@ class interface:
             raise ValueError("Unaligned addresses not allowed.")
         return self.reg_map_mem[address]
     
-    def dump_state(self, start_addr, end_addr, eob = False, offset = 0):
+    def dump_state(self, start_addr, end_addr, eob = False, offset = 0, driver_gen = False):
+        if(driver_gen):
+            self.fd_driver.write(f"\n//-----------------------------------------\n")
         for addr in range(start_addr, end_addr + 4, 4):
-            self.fd.write(struct.pack('>c', b'\x01'))  #write
-            self.fd.write(struct.pack('>I', addr + offset))
-            self.fd.write(struct.pack('>I', self.reg_map_mem[addr])) 
-            self.fd.write(struct.pack('>c', b'\xff'))  #strobes are always 1s
+            self.fd_mm_bin.write(struct.pack('>c', b'\x01'))  #write
+            self.fd_mm_bin.write(struct.pack('>I', addr + offset))
+            self.fd_mm_bin.write(struct.pack('>I', self.reg_map_mem[addr])) 
+            self.fd_mm_bin.write(struct.pack('>c', b'\xff'))  #strobes are always 1s
+            if(driver_gen):
+                self.fd_driver.write(f"mm_write_single(0x{(addr + offset):0{8}X}, 0x{self.reg_map_mem[addr]:0{8}X});\n")    
         if(eob):
-            self.fd.write(struct.pack('>c', b'\x00'))  #write
-            self.fd.write(struct.pack('>I', 0x00))
-            self.fd.write(struct.pack('>I', 0x00)) 
-            self.fd.write(struct.pack('>c', b'\x00'))  #strobes are always 1s
+            self.fd_mm_bin.write(struct.pack('>c', b'\x00'))  #write
+            self.fd_mm_bin.write(struct.pack('>I', 0x00))
+            self.fd_mm_bin.write(struct.pack('>I', 0x00)) 
+            self.fd_mm_bin.write(struct.pack('>c', b'\x00'))  #strobes are always 1s
+        if(driver_gen):
+            self.fd_driver.write(f"//-----------------------------------------\n")   
+
 
     def read_state(self, start_addr, end_addr, eob = False):
         for addr in range(start_addr, end_addr + 4, 4):
-            self.fd.write(struct.pack('>c', b'\x00'))  #read
-            self.fd.write(struct.pack('>I', addr))
-            self.fd.write(struct.pack('>I', 0x00)) 
-            self.fd.write(struct.pack('>c', b'\xff'))
+            self.fd_mm_bin.write(struct.pack('>c', b'\x00'))  #read
+            self.fd_mm_bin.write(struct.pack('>I', addr))
+            self.fd_mm_bin.write(struct.pack('>I', 0x00)) 
+            self.fd_mm_bin.write(struct.pack('>c', b'\xff'))
         if(eob):
-            self.fd.write(struct.pack('>c', b'\x00'))  #write
-            self.fd.write(struct.pack('>I', 0x00))
-            self.fd.write(struct.pack('>I', 0x00)) 
-            self.fd.write(struct.pack('>c', b'\x00'))  #strobes are always 1s
+            self.fd_mm_bin.write(struct.pack('>c', b'\x00'))  #write
+            self.fd_mm_bin.write(struct.pack('>I', 0x00))
+            self.fd_mm_bin.write(struct.pack('>I', 0x00)) 
+            self.fd_mm_bin.write(struct.pack('>c', b'\x00'))  #strobes are always 1s
 
 
 class _RegCnn_accel_ctrl_reg:
